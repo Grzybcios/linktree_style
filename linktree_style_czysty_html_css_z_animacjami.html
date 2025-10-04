@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="pl" data-theme="system">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Twoje Linki – Linktree‑style</title>
+  <meta name="description" content="Prosta strona z linkami w stylu Linktree – czysty HTML + CSS z delikatnymi animacjami." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg: #0b1020;
+      --bg-2: #0f172a;
+      --card: #0b1229;
+      --text: #e5e7eb;
+      --text-dim: #9aa4b2;
+      --border: #23324d;
+      --accent: #7c3aed; /* zmień akcent na swój kolor */
+      --accent-2: #06b6d4;
+      --ring: #94a3b8;
+      --radius: 16px;
+      --shadow: 0 10px 30px rgba(2,8,23,.35), 0 2px 8px rgba(2,8,23,.2);
+    }
+    /* Jasny tryb */
+    @media (prefers-color-scheme: light){
+      :root{ --bg:#f8fafc; --bg-2:#eef2ff; --card:#ffffff; --text:#0f172a; --text-dim:#46566e; --border:#e5e7eb; --ring:#cbd5e1 }
+    }
+    /* Nadpisywanie przez przełącznik */
+    html[data-theme="light"]{ --bg:#f8fafc; --bg-2:#eef2ff; --card:#ffffff; --text:#0f172a; --text-dim:#46566e; --border:#e5e7eb; --ring:#cbd5e1 }
+    html[data-theme="dark"]{ --bg:#0b1020; --bg-2:#0f172a; --card:#0b1229; --text:#e5e7eb; --text-dim:#9aa4b2; --border:#23324d; --ring:#94a3b8 }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--text);
+      background: radial-gradient(1200px 600px at 80% -10%, rgba(124,58,237,.25), transparent 60%),
+                  radial-gradient(900px 500px at 10% 0%, rgba(6,182,212,.25), transparent 60%),
+                  linear-gradient(180deg, var(--bg-2), var(--bg));
+      min-height:100%;
+      display:grid;
+      place-items:center;
+      overflow-x:hidden;
+    }
+
+    /* Animowana poświata tła */
+    .glow{
+      position:fixed; inset:-30vmax; pointer-events:none; z-index:-1;
+      background: radial-gradient(closest-side, rgba(124,58,237,.25), transparent),
+                  radial-gradient(closest-side, rgba(6,182,212,.22), transparent);
+      filter: blur(60px);
+      animation: float 18s ease-in-out infinite alternate;
+      transform: translateZ(0);
+    }
+    @keyframes float{ from{transform: translate(-6%, -4%) rotate(0deg)} to{transform: translate(6%, 4%) rotate(5deg)} }
+
+    .wrap{ width:min(720px, 92vw); padding:32px 20px 48px }
+
+    .card{
+      background: linear-gradient(180deg, color-mix(in oklab, var(--card), transparent 20%), var(--card));
+      border:1px solid var(--border);
+      border-radius:calc(var(--radius) + 4px);
+      box-shadow: var(--shadow);
+      padding:28px;
+      position:relative;
+      overflow:hidden;
+      isolation:isolate;
+    }
+    .card::after{ /* delikatny gradient na krawędziach */
+      content:""; position:absolute; inset:-1px; border-radius:inherit; pointer-events:none;
+      background: linear-gradient(120deg, rgba(124,58,237,.25), rgba(6,182,212,.25), transparent 60%);
+      mask: linear-gradient(#000, transparent 60%);
+      mix-blend-mode: overlay; opacity:.7;
+    }
+
+    /* Header */
+    .header{ display:flex; align-items:center; gap:18px }
+    .avatar{ width:84px; height:84px; border-radius:50%; object-fit:cover; border:2px solid color-mix(in oklab, var(--ring), transparent 50%); box-shadow: 0 10px 24px rgba(0,0,0,.25) }
+    h1{ font-size: clamp(22px, 3vw, 28px); margin:0 0 2px }
+    .meta{ color:var(--text-dim); font-size:14px }
+
+    .chips{ display:flex; flex-wrap:wrap; gap:10px; margin-top:14px }
+    .chip{
+      display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px;
+      background: color-mix(in oklab, var(--card), var(--border) 30%);
+      border:1px solid var(--border); text-decoration:none; color:var(--text);
+      font-weight:500; font-size:13px; transition: transform .15s ease, background .2s ease, border-color .2s ease;
+    }
+    .chip:hover{ transform: translateY(-1px); border-color: color-mix(in oklab, var(--accent), white 60%) }
+
+    /* Lista linków */
+    .links{ list-style:none; padding:0; margin:22px 0 0; display:grid; gap:12px }
+    .link{
+      position:relative; overflow:hidden; border-radius: calc(var(--radius) + 2px);
+      border:1px solid var(--border); background: linear-gradient(180deg, color-mix(in oklab, var(--card), black 4%), var(--card));
+      box-shadow: 0 6px 20px rgba(2,8,23,.22);
+      transition: transform .2s cubic-bezier(.2,.8,.2,1), box-shadow .2s ease, border-color .2s ease;
+      animation: fadeUp .6s ease both; /* animacja wejścia */
+    }
+    .link:nth-child(1){ animation-delay:.05s }
+    .link:nth-child(2){ animation-delay:.12s }
+    .link:nth-child(3){ animation-delay:.19s }
+    .link:nth-child(4){ animation-delay:.26s }
+    .link:nth-child(5){ animation-delay:.33s }
+
+    @keyframes fadeUp { from{ opacity:0; transform: translateY(10px) } to{ opacity:1; transform: translateY(0) } }
+
+    .link > a{ display:grid; grid-template-columns:auto 1fr auto; gap:14px; align-items:center; padding:16px 18px; text-decoration:none; color:inherit }
+    .icon{ width:22px; height:22px; opacity:.9 }
+    .title{ font-weight:600; letter-spacing:.2px }
+    .subtitle{ font-size:13px; color:var(--text-dim); margin-top:2px }
+
+    .link:hover{ transform: translateY(-2px) scale(1.01); box-shadow: 0 12px 30px rgba(2,8,23,.35); border-color: color-mix(in oklab, var(--accent), white 70%) }
+    .link:hover .pulse{ opacity:1; transform: translateX(0) }
+
+    /* Pulsujący akcent w rogu przy hover */
+    .pulse{ position:absolute; inset:0; pointer-events:none; opacity:0; transition: opacity .25s ease, transform .25s ease; transform: translateX(-6%) }
+    .pulse::before{ content:""; position:absolute; right:-40px; top:-40px; width:140px; height:140px; border-radius:50%;
+      background: radial-gradient(circle at center, color-mix(in oklab, var(--accent), white 10%), transparent 70%);
+      filter: blur(12px); opacity:.6 }
+
+    /* Stopka */
+    .footer{ margin-top:18px; text-align:center; font-size:12px; color:var(--text-dim) }
+
+    /* Przycisk trybu */
+    .theme-toggle{ position: fixed; right:14px; top:14px; z-index:5; border:none; background: color-mix(in oklab, var(--card), var(--border) 35%); border:1px solid var(--border); border-radius:999px; padding:8px 12px; display:flex; align-items:center; gap:8px; color:var(--text); cursor:pointer; box-shadow: var(--shadow); }
+    .theme-toggle:hover{ border-color: color-mix(in oklab, var(--accent), white 60%) }
+    .theme-toggle svg{ width:18px; height:18px }
+
+    /* Responsywność */
+    @media (max-width:520px){ .link > a{ grid-template-columns: auto 1fr; grid-template-rows: auto auto; gap:10px } .subtitle{ grid-column: span 2 } }
+  </style>
+</head>
+<body>
+  <div class="glow" aria-hidden="true"></div>
+  <button class="theme-toggle" id="themeToggle" aria-label="Przełącz motyw">
+    <svg id="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path></svg>
+    <svg id="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+    <span id="themeLabel">System</span>
+  </button>
+
+  <main class="wrap">
+    <section class="card" aria-label="Panel profilu">
+      <header class="header">
+        <img class="avatar" src="https://images.unsplash.com/photo-1502685104226-ee32379fefbe?q=80&w=256&auto=format&fit=crop" alt="Avatar" />
+        <div>
+          <h1>Twoje Imię i Nazwisko</h1>
+          <div class="meta">@twoj.nick • Warszawa, Polska</div>
+          <nav class="chips" aria-label="Szybkie linki społecznościowe">
+            <a class="chip" href="https://twoja-strona.pl" target="_blank" rel="noopener" aria-label="Strona www">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+              www
+            </a>
+            <a class="chip" href="mailto:me@example.com" aria-label="Wyślij email">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="m22 6-10 7L2 6"/></svg>
+              email
+            </a>
+            <a class="chip" href="https://instagram.com/yourhandle" target="_blank" rel="noopener" aria-label="Instagram">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><path d="M17.5 6.5h.01"/></svg>
+              IG
+            </a>
+            <a class="chip" href="https://linkedin.com/in/yourhandle" target="_blank" rel="noopener" aria-label="LinkedIn">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+              in
+            </a>
+            <a class="chip" href="https://github.com/yourhandle" target="_blank" rel="noopener" aria-label="GitHub">
+              <svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5a12 12 0 0 0-3.79 23.4c.6.11.82-.26.82-.58v-2.02c-3.34.73-4.04-1.61-4.04-1.61-.55-1.4-1.35-1.77-1.35-1.77-1.1-.75.08-.74.08-.74 1.22.09 1.87 1.25 1.87 1.25 1.08 1.85 2.83 1.32 3.52 1 .11-.8.42-1.32.76-1.63-2.67-.31-5.48-1.33-5.48-5.93 0-1.31.47-2.38 1.24-3.22-.12-.31-.54-1.56.12-3.25 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.66 1.69.24 2.94.12 3.25.77.84 1.23 1.91 1.23 3.22 0 4.61-2.81 5.62-5.49 5.92.44.38.82 1.12.82 2.27v3.36c0 .32.22.69.83.57A12 12 0 0 0 12 .5z"/></svg>
+              gh
+            </a>
+          </nav>
+        </div>
+      </header>
+
+      <ul class="links" aria-label="Główne linki">
+        <li class="link">
+          <a href="https://twoja-strona.pl/oferta" target="_blank" rel="noopener">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13v-1a2 2 0 1 1 4 0v1"/><path d="M5 21h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2-3h-4L8 7H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2z"/></svg>
+            <div>
+              <div class="title">Oferta / Współpraca</div>
+              <div class="subtitle">Sprawdź jak mogę Ci pomóc</div>
+            </div>
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+            <span class="pulse" aria-hidden="true"></span>
+          </a>
+        </li>
+        <li class="link">
+          <a href="https://twoja-strona.pl/portfolio" target="_blank" rel="noopener">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+            <div>
+              <div class="title">Portfolio / Realizacje</div>
+              <div class="subtitle">Wybrane projekty i case studies</div>
+            </div>
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+            <span class="pulse" aria-hidden="true"></span>
+          </a>
+        </li>
+        <li class="link">
+          <a href="https://cal.com/yourhandle/30min" target="_blank" rel="noopener">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M8 2v4M16 2v4M3 10h18"/></svg>
+            <div>
+              <div class="title">Umów konsultację</div>
+              <div class="subtitle">Wolne terminy w kalendarzu</div>
+            </div>
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+            <span class="pulse" aria-hidden="true"></span>
+          </a>
+        </li>
+        <li class="link">
+          <a href="https://twoja-strona.pl/newsletter" target="_blank" rel="noopener">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="m22 6-10 7L2 6"/></svg>
+            <div>
+              <div class="title">Newsletter</div>
+              <div class="subtitle">Dołącz i zgarnij bonus PDF</div>
+            </div>
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+            <span class="pulse" aria-hidden="true"></span>
+          </a>
+        </li>
+      </ul>
+
+      <p class="footer">Zmienisz kolory, linki i treści w jednym pliku. Miłego korzystania! ✨</p>
+    </section>
+  </main>
+
+  <script>
+    // Prosty przełącznik motywu + zapamiętywanie
+    const html = document.documentElement;
+    const btn = document.getElementById('themeToggle');
+    const label = document.getElementById('themeLabel');
+    const sun = document.getElementById('sun');
+    const moon = document.getElementById('moon');
+
+    const saved = localStorage.getItem('theme');
+    if(saved){ html.setAttribute('data-theme', saved); updateIcon(saved); }
+    else { // dopasuj do systemu
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      html.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+      updateIcon(prefersDark ? 'dark' : 'light');
+    }
+
+    btn.addEventListener('click', () => {
+      const current = html.getAttribute('data-theme');
+      const next = current === 'light' ? 'dark' : 'light';
+      html.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+      updateIcon(next);
+    });
+
+    function updateIcon(mode){
+      label.textContent = mode === 'light' ? 'Jasny' : 'Ciemny';
+      sun.style.display = mode === 'light' ? 'none' : '';
+      moon.style.display = mode === 'light' ? '' : 'none';
+    }
+  </script>
+</body>
+</html>
